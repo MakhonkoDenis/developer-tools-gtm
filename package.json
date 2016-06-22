@@ -1,15 +1,13 @@
 {
-  "name": "cherry-framework",
+  "name": "WordPress",
   "version": "1.0.0",
-  "description": "WordPress Framework",
+  "description": "WordPress project",
   "main": "gulpfile.js",
-  "dependencies": {
+  "devDependencies": {
     "gulp": "^3.9.1",
     "gulp-concat": "^2.6.0",
     "gulp-uglify": "^1.5.3",
-    "jshint": "^2.9.2"
-  },
-  "devDependencies": {
+    "jshint": "^2.9.2",
     "gulp-imagemin": "^3.0.1",
     "gulp-jshint": "^2.0.1",
     "gulp-rename": "^1.2.2",
@@ -19,16 +17,10 @@
     "jshint-stylish": "^2.2.0"
   },
   "scripts": {
-    "gulp": "gulp"
   },
   "repository": {
-    "type": "git",
-    "url": "git+https://github.com/CherryFramework/cherry-framework.git"
   },
   "author": "Cherry team",
   "license": "GPL-3.0",
-  "bugs": {
-    "url": "https://github.com/CherryFramework/cherry-framework/issues"
-  },
-  "homepage": "https://github.com/CherryFramework/cherry-framework#readme"
+  "homepage": "https://github.com/MakhonkoDenis/wordpress-theme-gtm#readme"
 }
