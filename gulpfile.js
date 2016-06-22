@@ -68,8 +68,8 @@ function watchHandler() {
 
 function js(){
 	var jshint = require( 'gulp-jshint' ),
-		uglify = require( 'gulp-uglify' ),
-		stylish = require('jshint-stylish'),
+		uglify = require( 'gulp-uglify' ),/*
+		stylish = require('gulp-jshint-file-reporter'),*/
 		concat = require( 'gulp-concat' );
 
 	gulp
@@ -78,7 +78,9 @@ function js(){
 			'!' + path.base + path.cherryFramework.modules + path.assets.ignorJs,
 		] )
 		.pipe( jshint() )
-		.pipe( jshint.reporter( stylish ) )
+		.pipe( jshint.reporter( 'gulp-jshint-file-reporter', {
+			filename: './logs/jshint-output.log'
+		} ) )
 		.pipe( uglify() )
 		.pipe( rename( function( path ){
 			renameFile( path, '/min/', '.min')
@@ -131,4 +133,7 @@ function renameFile( path, subDir, sufix) {
 	path.basename += sufix;
 
 	console.log( 'FILE: ' + __dirname + '/' + path.dirname + path.basename  + path.extname );
+}
+function logFiles( logFileName ){
+	logFileName = './logs/jshint.log';
 }
