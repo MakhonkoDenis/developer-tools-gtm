@@ -1,0 +1,55 @@
+
+1 lint errors found in modules\cherry-js-core\assets\js\cherry-js-core.js
+  [160,46](W054) The Function constructor is a form of eval.
+51 lint errors found in modules\cherry-ui-elements\inc\ui-elements\ui-select\assets\select2.js
+  [30,5](W004) 'S2' is already defined.
+  [463,10](W041) Use '===' to compare with 'null'.
+  [795,22](W041) Use '===' to compare with 'null'.
+  [848,27](W041) Use '!==' to compare with 'null'.
+  [849,27](W041) Use '===' to compare with 'null'.
+  [904,17](W041) Use '===' to compare with 'null'.
+  [908,24](W041) Use '!==' to compare with 'null'.
+  [1234,17](W041) Use '===' to compare with 'null'.
+  [1295,44](W041) Use '!==' to compare with 'null'.
+  [1297,47](W041) Use '!==' to compare with 'null'.
+  [1670,26](W041) Use '===' to compare with 'null'.
+  [2874,17](W041) Use '!==' to compare with 'null'.
+  [3089,14](W041) Use '!==' to compare with 'null'.
+  [3147,17](W041) Use '!==' to compare with 'null'.
+  [3151,19](W041) Use '!==' to compare with 'null'.
+  [3155,24](W041) Use '===' to compare with 'null'.
+  [3155,61](W041) Use '!==' to compare with 'null'.
+  [3259,41](W041) Use '!==' to compare with 'null'.
+  [3296,23](W041) Use '!==' to compare with 'null'.
+  [3384,21](W041) Use '===' to compare with 'null'.
+  [3384,44](W041) Use '!==' to compare with 'null'.
+  [3396,27](W041) Use '!==' to compare with 'null'.
+  [3422,15](W041) Use '!==' to compare with 'null'.
+  [3637,33](W041) Use '!==' to compare with 'null'.
+  [3759,29](W041) Use '===' to compare with 'null'.
+  [4087,22](W041) Use '!==' to compare with 'null'.
+  [4331,29](W041) Use '===' to compare with 'null'.
+  [4332,24](W041) Use '!==' to compare with 'null'.
+  [4334,31](W041) Use '!==' to compare with 'null'.
+  [4365,35](W041) Use '!==' to compare with 'null'.
+  [4365,64](W041) Use '!==' to compare with 'null'.
+  [4372,25](W041) Use '!==' to compare with 'null'.
+  [4381,33](W041) Use '!==' to compare with 'null'.
+  [4391,32](W041) Use '===' to compare with 'null'.
+  [4394,24](W041) Use '!==' to compare with 'null'.
+  [4401,31](W041) Use '!==' to compare with 'null'.
+  [4416,33](W041) Use '===' to compare with 'null'.
+  [4440,34](W041) Use '!==' to compare with 'null'.
+  [4441,29](W041) Use '!==' to compare with 'null'.
+  [4442,39](W041) Use '!==' to compare with 'null'.
+  [4458,34](W041) Use '===' to compare with 'null'.
+  [4466,31](W041) Use '!==' to compare with 'null'.
+  [4488,35](W041) Use '!==' to compare with 'null'.
+  [4489,30](W041) Use '!==' to compare with 'null'.
+  [4490,40](W041) Use '!==' to compare with 'null'.
+  [4599,23](W041) Use '===' to compare with 'null'.
+  [4678,18](W041) Use '!==' to compare with 'null'.
+  [4697,31](W041) Use '===' to compare with 'null'.
+  [4701,31](W041) Use '===' to compare with 'null'.
+  [4705,31](W041) Use '===' to compare with 'null'.
+  [4705,31](E043) Too many errors. (87% scanned).

@@ -4,8 +4,8 @@ cherry-core.php
 setup.php
 
 # Logs
-logs
-*.log
+#logs
+#*.log
 npm-debug.log*
 
 # Runtime data
