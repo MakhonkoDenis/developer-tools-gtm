@@ -1,8 +1,5 @@
 #cherry
-modules
-cherry-core.php
-setup.php
-assets
+cherry-framework
 
 # Logs
 logs
@@ -11,3 +8,4 @@ logs
 # Dependency directories
 node_modules
 jspm_packages
+test-config

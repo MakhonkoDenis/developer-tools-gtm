@@ -10,7 +10,7 @@ var path = {
 				'!**/gulpfile.js',
 			],
 			output:{
-				path:'min/',
+				path:'/min/',
 				sufix: '.min'
 			}
 		},
@@ -18,11 +18,18 @@ var path = {
 			input: [
 				'**/*.scss',
 				'!**/node_modules/**/*.scss',
+				'!**/_*.scss',
 			],
 			output:{
-				path:'min/',
+				path:'/min/',
 				sufix: '.min'
-			}
+			},
+			inputMainScss: [
+				'assets/style.scss',
+			],
+			outputMainScss: [
+				'./',
+			]
 		},
 		css: {
 			input: [
@@ -31,20 +38,31 @@ var path = {
 				'!**/node_modules/**/*.css',
 			],
 			output:{
-				path:'min/',
+				path:'/min/',
 				sufix: '.min'
 			}
 		},
+		php: [
+			'**/*.php',
+		],
 		img: [
 			'**/*.+(jpg|jpeg|png|svg|gif)',
 			'!**/node_modules/**/*.+(jpg|jpeg|png|svg|gif)',
+		],
+		deleteFiles: [
+			'**/*.+(map|log|dll)',
+/*			'.gitignore',
+			'.jscsrc',
+			'.jshintignore',*/
+			'**/.travis.yml',
+			'**/codesniffer.ruleset.xml',
 		],
 		logs: 'logs/'
 	},
 	task = {
 		default: 'default',
 		watch: 'watch',
-		clear: 'clear',
+		clean: 'clean',
 		compile: {
 			all: 'compile',
 			scss: 'compile:scss' //compile and compress file
@@ -85,7 +103,7 @@ gulp
 	.task( task.compress.js, compressJs )
 	.task( task.compress.css, compressCss )
 	.task( task.compress.img, compressImg )
-	.task( task.tools.clear, clearHandler )
+	.task( task.tools.clean, cleanHandler )
 	.task( task.tools.renamePrefix, renamePrefix )
 	.task( task.develop, devHandler );
 
@@ -128,8 +146,8 @@ function compileScss(){
 			gulpSass( { outputStyle: 'compressed' } )
 				.on( 'error', gulpSass.logError )
 		)
-		.pipe( rename( function( path ){
-			renameFile( path, '/min/', '.min')
+		.pipe( rename( function( filePath ){
+			renameFile( filePath, path.scss.output.path, path.scss.output.sufix )
 		} ) )
 		.pipe( gulp.dest( './' ) );
 };
@@ -144,8 +162,8 @@ function compressJs(){
 	gulp
 		.src( path.js.input )
 		.pipe( uglify() )
-		.pipe( rename( function( path ){
-			renameFile( path, '/min/', '.min' )
+		.pipe( rename( function( filePath ){
+			renameFile( filePath, path.js.output.path, path.js.output.sufix )
 		} ) )
 		.pipe( gulp.dest( './' ) );
 };
@@ -156,8 +174,8 @@ function compressCss(){
 	gulp
 		.src( path.css.input )
 		.pipe( uglifycss() )
-		.pipe( rename( function( path ){
-			renameFile( path, '/min/', '.min')
+		.pipe( rename( function( filePath ){
+			renameFile( filePath, path.css.output.path, path.css.output.sufix )
 		} ) )
 		.pipe( gulp.dest( './' ) );
 };
@@ -175,23 +193,34 @@ function compressImg(){
 *	Check task
 **/
 function checkJs(){
-	var jsHint = require( 'gulp-jshint' )
-		/*jsLint = require( 'gulp-jslint' ),
-		concat = require( 'gulp-concat' )*/;
+	var jsHint = require( 'gulp-jshint' ),
+		jscs = require( 'gulp-jscs' ),
+		stylish = require( 'gulp-jscs-stylish' );
 
 	gulp
 		.src( path.js.input )
 		.pipe( jsHint() )
+		.pipe( jscs( {
+			fix: false,
+			configPath: './test-config/.jscsrc'
+		} ) )
+		.pipe( stylish.combineWithHintResults() )
 		.pipe( jsHint.reporter( 'gulp-jshint-file-reporter', {
-			filename: path.base + path.logs + 'jshint.log'
-		} ) )/*
-		.pipe( jsLint() )
-		.pipe( jsLint.reporter( 'gulp-jshint-file-reporter', {
-			filename: path.base + path.logs + 'jslint.log'
-		} ) )*/;
+			filename: path.base + path.logs + 'js-cs-and-hint.log'
+		} ) )
 };
 
 function checkPhp() {
+	var phpcs = require('gulp-phpcs');
+
+	gulp
+		.src( path.php )
+		.pipe( phpcs({
+			bin: './test-config/php_codesniffer',
+			standard: 'PSR2',
+			warningSeverity: 0
+		}) )
+		.pipe( phpcs.reporter( 'file', { path: path.base + path.logs + 'php-cs.log' } ) );
 	console.log('checkPhp');
 }
 
@@ -202,8 +231,12 @@ function checkTextDomain() {
 /**
 * tools tack
 **/
-function clearHandler() {
-	console.log('clearHandler');
+function cleanHandler() {
+	var clean = require('gulp-clean');
+
+	gulp
+		.src( path.deleteFiles )
+		.pipe( clean() );
 }
 
 function renamePrefix() {
@@ -217,8 +250,7 @@ function renameFile( path, subDir, sufix) {
 	path.dirname += subDir;
 	path.basename += sufix;
 
-	console.log('FILE: ' + __dirname + '/' + path.dirname + path.basename  + path.extname );
-	//report += '\tFILE: ' + __dirname + '/' + path.dirname + path.basename  + path.extname + '\r';
+	//console.log('FILE: ' + __dirname + '/' + path.dirname + path.basename  + path.extname );
 };
 
 function merge( object ) {
