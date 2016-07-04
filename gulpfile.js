@@ -12,11 +12,15 @@ var path = {
 			output:{
 				path:'/min/',
 				sufix: '.min'
-			}
+			},
+			inputThemeJs: [
+				'./assets/js/theme-script.js',
+			]
 		},
 		scss: {
 			input: [
 				'**/*.scss',
+				'!**/assets/sass/style.scss',
 				'!**/node_modules/**/*.scss',
 				'!**/_*.scss',
 			],
@@ -24,17 +28,16 @@ var path = {
 				path:'/min/',
 				sufix: '.min'
 			},
-			inputMainScss: [
-				'assets/style.scss',
-			],
-			outputMainScss: [
-				'./',
+			inputThemeScss: [
+				'./assets/sass/style.scss',
 			]
 		},
 		css: {
 			input: [
 				'**/*.css',
 				'!**/*.min.css',
+				'!**/rtl.css',
+				'!**/style.css',
 				'!**/node_modules/**/*.css',
 			],
 			output:{
@@ -50,57 +53,102 @@ var path = {
 			'!**/node_modules/**/*.+(jpg|jpeg|png|svg|gif)',
 		],
 		deleteFiles: [
-			'**/*.+(map|log|dll)',
-/*			'.gitignore',
-			'.jscsrc',
-			'.jshintignore',*/
 			'**/.travis.yml',
 			'**/codesniffer.ruleset.xml',
+			'test-config',
+			'logs',
+			'node_modules',
+			'**/*.+(map|log|dll)',
 		],
 		logs: 'logs/'
 	},
 	task = {
 		default: 'default',
-		watch: 'watch',
-		clean: 'clean',
+		watch: {
+			dev:'watch:dev',
+			maker:'watch:maker'
+		},
 		compile: {
 			all: 'compile',
+			themeScss: 'compile:theme-scss', //compile and compress file
 			scss: 'compile:scss' //compile and compress file
+		},
+		compress: {
+			all: 'compress',
+			themeJs: 'compress:theme-js', //compress file
+			js: 'compress:js', //compress file
+			css: 'compress:css', //compress file
+			img: 'compress:img'
 		},
 		check: {
 			all: 'check',
 			js: 'check:js',
 			php: 'check:php',
-			textDomain: 'check:textdomain',
-		},
-		compress: {
-			all: 'compress',
-			js: 'compress:js', //compress file
-			css: 'compress:css', //compress file
-			img: 'compress:img',
+			textDomain: 'check:textdomain'
 		},
 		tools:{
-			clear: 'clear',
+			clean: 'clean',
 			renamePrefix: 'rename-prefix'
 		},
 		develop: 'dev'
 	},
-	report,
 	gulp = require( 'gulp' ),
-	rename = require( 'gulp-rename' );
+	rename = require( 'gulp-rename' ),
+	notify = require('gulp-notify');
 
 
 gulp
 	//.task( task.default, task )
-	.task( task.watch, watchHandler )
+	.task(
+		task.watch.dev,
+		watcher.bind(
+			null,
+			{
+				file: merge( [ path.js.input, path.scss.input, path.scss.inputThemeScss, path.css.input, path.img, ] ),
+				task: merge( [ task.compile, task.compress, ] )
+			}
+		)
+	)
+	.task(
+		task.watch.maker,
+		watcher.bind(
+			null,
+			{
+				file: [ path.js.inputThemeJs, path.scss.inputThemeScss ],
+				task: [ task.compile.themeScss, task.compress.themeJs, ]
+			}
+		)
+	)
 	.task( task.check.all, merge( task.check ) )
 	.task( task.check.js, checkJs )
 	.task( task.check.php, checkPhp )
 	.task( task.check.textDomain, checkTextDomain )
 	.task( task.compile.all, merge( task.compile ) )
-	.task( task.compile.scss, compileScss )
+	.task(
+		task.compile.scss,
+		compileScss.bind(
+			null,
+			{
+				file: path.scss.input,
+				outputFile: './',
+				rename:true
+			}
+		)
+	)
+	.task(
+		task.compile.themeScss,
+		compileScss.bind(
+			null,
+			{
+				file: path.scss.inputThemeScss,
+				outputFile: path.base,
+				rename:false
+			}
+		)
+	)
 	.task( task.compress.all, merge( task.compress ) )
-	.task( task.compress.js, compressJs )
+	.task( task.compress.themeJs, compressJs.bind( null, { file: path.js.inputThemeJs } ) )
+	.task( task.compress.js, compressJs.bind( null, { file: path.js.input } ) )
 	.task( task.compress.css, compressCss )
 	.task( task.compress.img, compressImg )
 	.task( task.tools.clean, cleanHandler )
@@ -115,15 +163,12 @@ function devHandler() {
 /**
 *	Wotch for change files
 **/
-function watchHandler() {
-	var inputFiles = mergeArray( [ path.js.input, path.scss.input, path.css.input, path.img, ] ),
-		allTack = mergeArray( [ task.compile, task.compress ] ),
-		watcher = gulp.watch(
-			inputFiles,
-			allTack
-		);
-
-	watcher
+function watcher( data ) {
+	gulp
+		.watch(
+			data.file,
+			data.task
+		)
 		.on( 'change', function( event ) {
 			console.log( 'Event type: ' + event.type );
 			console.log( 'Event path: ' + event.path );
@@ -137,56 +182,83 @@ function watchHandler() {
 /**
 *	Compail task
 **/
-function compileScss(){
-	var gulpSass = require( 'gulp-sass' );
+function compileScss( data ){
+	var gulpSass = require( 'gulp-sass' ),
+		autoprefixer = require('gulp-autoprefixer');
 
-	gulp
-		.src( path.scss.input )
-		.pipe(
-			gulpSass( { outputStyle: 'compressed' } )
-				.on( 'error', gulpSass.logError )
-		)
-		.pipe( rename( function( filePath ){
-			renameFile( filePath, path.scss.output.path, path.scss.output.sufix )
-		} ) )
-		.pipe( gulp.dest( './' ) );
+	return gulp
+			.src( data.file )
+			.pipe( autoprefixer() )
+			.pipe(
+				gulpSass( { outputStyle: 'compressed' } )
+					.on( 'error', gulpSass.logError )
+			)
+			.pipe( rename( function( filePath ){
+				if( data.rename ){
+					renameFile( filePath, path.scss.output.path, path.scss.output.sufix )
+				}
+			} ) )
+			.pipe( gulp.dest( data.outputFile ) )
+			.pipe( notify(
+				{
+					title:'Compile SASS.',
+					message:'File: <%= file.relative %>'
+				}
+			) );
 };
 
 /**
 *	Compress task
 **/
-function compressJs(){
+function compressJs( data ){
 	var uglify = require( 'gulp-uglify' );
 
-	report += '\rCompile Files:\r';
-	gulp
-		.src( path.js.input )
-		.pipe( uglify() )
-		.pipe( rename( function( filePath ){
-			renameFile( filePath, path.js.output.path, path.js.output.sufix )
-		} ) )
-		.pipe( gulp.dest( './' ) );
+	return gulp
+			.src( data.file )
+			.pipe( uglify() )
+			.pipe( rename( function( filePath ){
+				renameFile( filePath, path.js.output.path, path.js.output.sufix )
+			} ) )
+			.pipe( gulp.dest( './' ) )
+			.pipe( notify(
+				{
+					title:'Compress JS.',
+					message:'File: <%= file.relative %>'
+				}
+			) );
 };
 
 function compressCss(){
 	var uglifycss = require( 'gulp-uglifycss' );
 
-	gulp
-		.src( path.css.input )
-		.pipe( uglifycss() )
-		.pipe( rename( function( filePath ){
-			renameFile( filePath, path.css.output.path, path.css.output.sufix )
-		} ) )
-		.pipe( gulp.dest( './' ) );
+	return gulp
+			.src( path.css.input )
+			.pipe( uglifycss() )
+			.pipe( rename( function( filePath ){
+				renameFile( filePath, path.css.output.path, path.css.output.sufix )
+			} ) )
+			.pipe( gulp.dest( './' ) )
+			.pipe( notify(
+				{
+					title:'Compress CSS.',
+					message:'File: <%= file.relative %>'
+				}
+			) );
 };
 
 function compressImg(){
 	var imagemin = require( 'gulp-imagemin' );
 
-	gulp
-		.src( path.img )
-		.pipe( imagemin() )
-		.pipe( gulp.dest( './' ) );
+	return gulp
+			.src( path.img )
+			.pipe( imagemin() )
+			.pipe( gulp.dest( './' ) )
+			.pipe( notify(
+				{
+					title:'Compress images.',
+					message:'File: <%= file.relative %>'
+				}
+			) );
 };
 
 /**
@@ -195,33 +267,46 @@ function compressImg(){
 function checkJs(){
 	var jsHint = require( 'gulp-jshint' ),
 		jscs = require( 'gulp-jscs' ),
-		stylish = require( 'gulp-jscs-stylish' );
+		stylish = require( 'gulp-jscs-stylish' ),
+		rev = require( 'gulp-rev' );
 
-	gulp
-		.src( path.js.input )
-		.pipe( jsHint() )
-		.pipe( jscs( {
-			fix: false,
-			configPath: './test-config/.jscsrc'
-		} ) )
-		.pipe( stylish.combineWithHintResults() )
-		.pipe( jsHint.reporter( 'gulp-jshint-file-reporter', {
-			filename: path.base + path.logs + 'js-cs-and-hint.log'
-		} ) )
+	return gulp
+			.src( path.js.input )
+
+			.pipe( jscs( {
+				fix: false,
+				configPath: './cherry-framework/.jscsrc'
+			} ) )
+			.pipe( jsHint() )
+			.pipe( stylish.combineWithHintResults() )
+			.pipe( jsHint.reporter( 'gulp-jshint-file-reporter', {
+				filename: path.base + path.logs + 'js-cs-and-hint.log'
+			} ) )
+			.pipe( notify(
+				{
+					title:'Check JS.',
+					message:'File: <%= file.relative %>'
+				}
+			) );
 };
 
 function checkPhp() {
 	var phpcs = require('gulp-phpcs');
 
-	gulp
-		.src( path.php )
-		.pipe( phpcs({
-			bin: './test-config/php_codesniffer',
-			standard: 'PSR2',
-			warningSeverity: 0
-		}) )
-		.pipe( phpcs.reporter( 'file', { path: path.base + path.logs + 'php-cs.log' } ) );
-	console.log('checkPhp');
+	return gulpgulp
+			.src( path.php )
+			.pipe( phpcs({
+				bin: './test-config/php_codesniffer',
+				standard: 'PSR2',
+				warningSeverity: 0
+			}) )
+			.pipe( phpcs.reporter( 'file', { path: path.base + path.logs + 'php-cs.log' } ) )
+			.pipe( notify(
+				{
+					title:'Check PHP.',
+					message:'File: <%= file.relative %>'
+				}
+			) );
 }
 
 function checkTextDomain() {
@@ -234,9 +319,15 @@ function checkTextDomain() {
 function cleanHandler() {
 	var clean = require('gulp-clean');
 
-	gulp
-		.src( path.deleteFiles )
-		.pipe( clean() );
+	return gulp
+			.src( path.deleteFiles )
+			.pipe( clean() )
+			.pipe( notify(
+				{
+					title:'Clear theme done.',
+					message:'Delete file: <%= file.relative %>'
+				}
+			) );
 }
 
 function renamePrefix() {
@@ -257,20 +348,20 @@ function merge( object ) {
 	var item,
 		deepItem,
 		pushItem,
-		ignor = 'all',
+		ignor = [ 'all', 'themeJs', ],
 		outputArray = new Array();
 
 	for ( item in object ) {
 
 		if( 'object' === typeof( object[ item ] ) || 'array' === typeof( object[ item ] )){
 			for ( deepItem in object[ item ] ) {
-				if ( ignor !== deepItem ) {
+				if ( -1 === ignor.indexOf( deepItem ) ) {
 					outputArray.push( object[ item ][ deepItem ] );
 				}
 			}
 
 		} else {
-			if ( ignor !== item ) {
+			if ( -1 === ignor.indexOf( deepItem ) ) {
 				outputArray.push( object[ item ] );
 			}
 		}
