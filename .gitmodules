@@ -1,0 +1,6 @@
+[submodule "style_guide_config/WordPress-Coding-Standards"]
+	path = style_guide_config/WordPress-Coding-Standards
+	url = https://github.com/WordPress-Coding-Standards/WordPress-Coding-Standards.git
+[submodule "style_guide_config/PHP_CodeSniffer"]
+	path = style_guide_config/PHP_CodeSniffer
+	url = https://github.com/squizlabs/PHP_CodeSniffer.git
