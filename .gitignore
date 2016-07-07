@@ -1,11 +1,2 @@
-#cherry
-cherry-framework
-
-# Logs
-logs
-*.log
-
 # Dependency directories
 node_modules
-jspm_packages
-test-config

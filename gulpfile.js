@@ -1,101 +1,95 @@
 'use strict';
 
-var path = {
-		base: __dirname + '/',
-		js: {
-			input: [
-				'**/*.js',
-				'!**/*.min.js',
-				'!**/node_modules/**/*.js',
-				'!**/gulpfile.js',
-			],
-			output:{
-				path:'/min/',
-				sufix: '.min'
-			},
-			inputThemeJs: [
-				'./assets/js/theme-script.js',
-			]
-		},
-		scss: {
-			input: [
-				'**/*.scss',
-				'!**/assets/sass/style.scss',
-				'!**/node_modules/**/*.scss',
-				'!**/_*.scss',
-			],
-			output:{
-				path:'/min/',
-				sufix: '.min'
-			},
-			inputThemeScss: [
-				'./assets/sass/style.scss',
-			]
-		},
-		css: {
-			input: [
-				'**/*.css',
-				'!**/*.min.css',
-				'!**/rtl.css',
-				'!**/style.css',
-				'!**/node_modules/**/*.css',
-			],
-			output:{
-				path:'/min/',
-				sufix: '.min'
-			}
-		},
-		php: [
-			'**/*.php',
-		],
-		img: [
-			'**/*.+(jpg|jpeg|png|svg|gif)',
-			'!**/node_modules/**/*.+(jpg|jpeg|png|svg|gif)',
-		],
-		deleteFiles: [
-			'**/.travis.yml',
-			'**/codesniffer.ruleset.xml',
-			'test-config',
-			'logs',
-			'node_modules',
-			'**/*.+(map|log|dll)',
-		],
-		logs: 'logs/'
-	},
-	task = {
-		default: 'default',
-		watch: {
-			dev:'watch:dev',
-			maker:'watch:maker'
-		},
-		compile: {
-			all: 'compile',
-			themeScss: 'compile:theme-scss', //compile and compress file
-			scss: 'compile:scss' //compile and compress file
-		},
-		compress: {
-			all: 'compress',
-			themeJs: 'compress:theme-js', //compress file
-			js: 'compress:js', //compress file
-			css: 'compress:css', //compress file
-			img: 'compress:img'
-		},
-		check: {
-			all: 'check',
-			js: 'check:js',
-			php: 'check:php',
-			textDomain: 'check:textdomain'
-		},
-		tools:{
-			clean: 'clean',
-			renamePrefix: 'rename-prefix'
-		},
-		develop: 'dev'
-	},
-	gulp = require( 'gulp' ),
-	rename = require( 'gulp-rename' ),
-	notify = require('gulp-notify');
+const	gulp = require( 'gulp' ),
+		rename = require( 'gulp-rename' ),
+		notify = require('gulp-notify')
+		fs = require( 'fs' ),
+		package = JSON.parse( fs.readFileSync( `${__dirname}/package.json` ) );
 
+const	projectPath = '',
+		path = {
+			js: {
+				input: [
+					`${ projectPath }/**/*.js`,
+					'!${ projectPath }/**/*.min.js',
+				],
+				inputThemeJs: [
+					'${ projectPath }/assets/js/theme-script.js',
+				],
+				output:{
+					path:'/min/',
+					sufix: '.min'
+				}
+			},
+			scss: {
+				input: [
+					'${ projectPath }/**/*.(sass|scss)',
+					'!${ projectPath }/**/assets/sass/style.(sass|scss)',
+				],
+				inputThemeScss: [
+					'${ projectPath }/assets/sass/style.(sass|scss)',
+				],
+				output:{
+					path:'/min/',
+					sufix: '.min'
+				}
+			},
+			css: {
+				input: [
+					'${ projectPath }/**/*.css',
+					'!${ projectPath }/**/*.min.css',
+					'!${ projectPath }/**/(style|rtl).css',
+				],
+				output:{
+					path:'/min/',
+					sufix: '.min'
+				}
+			},
+			php: [
+				'${ projectPath }/**/*.php',
+			],
+			img: [
+				'${ projectPath }/**/*.+(jpg|jpeg|png|svg|gif)',
+			],
+			deleteFiles: [
+				'${ projectPath }/logs',
+				'${ projectDir }/**/*.+(map|log|dll)',
+			],
+			logs: '${ projectPath }/logs/'
+		},
+		task = {
+			default: 'default',
+			watch: {
+				dev: 'watch:dev',
+				maker: 'watch:maker'
+			},
+			compile: {
+				all: 'compile',
+				themeScss: 'compile:theme-scss', //compile and compress file
+				scss: 'compile:scss' //compile and compress file
+			},
+			compress: {
+				all: 'compress',
+				themeJs: 'compress:theme-js', //compress file
+				js: 'compress:js', //compress file
+				css: 'compress:css', //compress file
+				img: 'compress:img'
+			},
+			check: {
+				all: 'check',
+				js: 'check:js',
+				php: 'check:php',
+				textDomain: 'check:textdomain'
+			},
+			tools:{
+				clean: 'clean',
+				renamePrefix: 'rename-prefix'
+			},
+			develop: 'dev'
+		};
+
+const	PHP_CODING_STANDARDS_PATH = `${__dirname}/style_guide_config/php_codesniffer/scripts/phpcs`,
+		WP_CODING_STANDARDS_PATH = `${__dirname}/style_guide_config/wordpress_coding_standards`;
 
 gulp
 	//.task( task.default, task )
@@ -119,10 +113,10 @@ gulp
 			}
 		)
 	)
-	.task( task.check.all, merge( task.check ) )
+	/*.task( task.check.all, merge( task.check ) )
 	.task( task.check.js, checkJs )
 	.task( task.check.php, checkPhp )
-	.task( task.check.textDomain, checkTextDomain )
+	.task( task.check.textDomain, checkTextDomain )*/
 	.task( task.compile.all, merge( task.compile ) )
 	.task(
 		task.compile.scss,
@@ -141,7 +135,7 @@ gulp
 			null,
 			{
 				file: path.scss.inputThemeScss,
-				outputFile: path.base,
+				outputFile: projectPathв,
 				rename:false
 			}
 		)
@@ -151,9 +145,9 @@ gulp
 	.task( task.compress.js, compressJs.bind( null, { file: path.js.input } ) )
 	.task( task.compress.css, compressCss )
 	.task( task.compress.img, compressImg )
-	.task( task.tools.clean, cleanHandler )
+	/*.task( task.tools.clean, cleanHandler )
 	.task( task.tools.renamePrefix, renamePrefix )
-	.task( task.develop, devHandler );
+	.task( task.develop, devHandler )*/;
 
 function devHandler() {
 	console.log( merge( task.compress ) );
@@ -183,7 +177,7 @@ function watcher( data ) {
 *	Compail task
 **/
 function compileScss( data ){
-	var gulpSass = require( 'gulp-sass' ),
+	let gulpSass = require( 'gulp-sass' ),
 		autoprefixer = require('gulp-autoprefixer');
 
 	return gulp
@@ -211,7 +205,7 @@ function compileScss( data ){
 *	Compress task
 **/
 function compressJs( data ){
-	var uglify = require( 'gulp-uglify' );
+	let uglify = require( 'gulp-uglify' );
 
 	return gulp
 			.src( data.file )
@@ -229,7 +223,7 @@ function compressJs( data ){
 };
 
 function compressCss(){
-	var uglifycss = require( 'gulp-uglifycss' );
+	let uglifycss = require( 'gulp-uglifycss' );
 
 	return gulp
 			.src( path.css.input )
@@ -247,7 +241,7 @@ function compressCss(){
 };
 
 function compressImg(){
-	var imagemin = require( 'gulp-imagemin' );
+	let imagemin = require( 'gulp-imagemin' );
 
 	return gulp
 			.src( path.img )
@@ -263,7 +257,7 @@ function compressImg(){
 
 /**
 *	Check task
-**/
+**//*
 function checkJs(){
 	var jsHint = require( 'gulp-jshint' ),
 		jscs = require( 'gulp-jscs' ),
@@ -312,10 +306,10 @@ function checkPhp() {
 function checkTextDomain() {
 	console.log('checkTextDomain');
 }
-
+*/
 /**
 * tools tack
-**/
+**//*
 function cleanHandler() {
 	var clean = require('gulp-clean');
 
@@ -333,7 +327,7 @@ function cleanHandler() {
 function renamePrefix() {
 	console.log('renamePrefix');
 }
-
+*/
 /**
 * Other function
 **/
