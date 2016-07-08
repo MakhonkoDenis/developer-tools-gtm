@@ -3,6 +3,8 @@
 	"version": "1.0.0",
 	"description": "Developer tools gtm",
 	"author": "Cherry Team",
+	"repository": "https://github.com/MakhonkoDenis/developer-tools-gtm",
+	"license": "MIT",
 	"scripts": {
 		"install": "git submodule init && git submodule update"
 	},
