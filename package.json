@@ -1,27 +1,29 @@
 {
-	"name": "developer-tools-gtm",
-	"version": "1.0.0",
-	"description": "Developer tools gtm",
-	"author": "Cherry Team",
-	"scripts": {
-		"install": "git submodule init && git submodule update"
-	},
-	"devDependencies": {
-		"gulp": "^3.9.1",
-		"gulp-autoprefixer": "^3.1.0",
-		"gulp-clean": "^0.3.2",
-		"gulp-imagemin": "^3.0.1",
-		"gulp-jscs": "^4.0.0",
-		"gulp-jscs-stylish": "^1.4.0",
-		"gulp-jshint": "^2.0.1",
-		"gulp-jshint-file-reporter": "0.0.2",
-		"gulp-notify": "^2.2.0",
-		"gulp-phpcs": "^1.1.1",
-		"gulp-rename": "^1.2.2",
-		"gulp-rev": "^7.1.0",
-		"gulp-sass": "^2.3.2",
-		"gulp-uglify": "^1.5.3",
-		"gulp-uglifycss": "^1.0.6",
-		"jshint": "^2.9.2"
-	}
+  "name": "developer-tools-gtm",
+  "version": "1.0.0",
+  "description": "Developer tools gtm",
+  "author": "Cherry Team",
+  "scripts": {
+    "install": "git submodule init && git submodule update"
+  },
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-autoprefixer": "^3.1.0",
+    "gulp-clean": "^0.3.2",
+    "gulp-imagemin": "^3.0.1",
+    "gulp-jscs": "^4.0.0",
+    "gulp-jscs-stylish": "^1.4.0",
+    "gulp-jshint": "^2.0.1",
+    "gulp-jshint-file-reporter": "0.0.2",
+    "gulp-json-editor": "^2.2.1",
+    "gulp-notify": "^2.2.0",
+    "gulp-phpcs": "^1.1.1",
+    "gulp-rename": "^1.2.2",
+    "gulp-rev": "^7.1.0",
+    "gulp-sass": "^2.3.2",
+    "gulp-uglify": "^1.5.3",
+    "gulp-uglifycss": "^1.0.6",
+    "jshint": "^2.9.2",
+    "yargs": "^4.8.0"
+  }
 }
