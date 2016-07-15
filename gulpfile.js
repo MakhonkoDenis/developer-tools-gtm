@@ -3,11 +3,17 @@
 const	gulp   = require( 'gulp' ),
 		yargs  = require( 'yargs' ),
 		jeditor  = require( 'gulp-json-editor' ),
-		notify = require('gulp-notify'),
 		rename = require( 'gulp-rename' ),
 		imagemin = require( 'gulp-imagemin' ),
 		uglify = require( 'gulp-uglify' ),
-		uglifycss = require( 'gulp-uglifycss' );
+		uglifycss = require( 'gulp-uglifycss' ),
+		gulpSass = require( 'gulp-sass' ),
+		autoprefixer = require('gulp-autoprefixer'),
+		print = require('gulp-print'),
+		chalk = require('chalk');
+
+const	fileNameColor = chalk.cyan,
+		messageColor = chalk.green;
 
 let		configPath = `${__dirname}/config.json`,
 		config = require( configPath ),
@@ -29,11 +35,11 @@ const	SRC_PATH = {
 		},
 		scss: {
 			input: [
-				`${ projectPath }/**/*.(sass|scss)`,
-				`!${ projectPath }/**/assets/sass/style.(sass|scss)`,
+				`${ projectPath }/**/*.scss`,
+				`!${ projectPath }/**/assets/sass/style.scss`,
 			],
 			inputThemeScss: [
-				`${ projectPath }/assets/sass/style.(sass|scss)`,
+				`${ projectPath }/assets/sass/style.scss`,
 			],
 			output:{
 				path:'/min/',
@@ -53,7 +59,6 @@ const	SRC_PATH = {
 		},
 		img: [
 			`${ projectPath }/**/*.+(jpg|jpeg|png|svg|gif)`,
-			`${ projectPath }/../../uploads/**/*.+(jpg|jpeg|png|svg|gif)`,
 		],
 	},
 	TASK = {
@@ -91,7 +96,7 @@ const	SRC_PATH = {
 *	Set project
 **/
 gulp.task('use-in', ( done ) => {
-	let newProjectPath= yargs.argv.path.replace( /\\/g, '/' )
+	let newProjectPath= yargs.argv.path.replace( /\\/g, '/' ).replace( /(\\|\/)$/g, '' );
 	return gulp
 		.src( configPath )
 		.pipe( jeditor( function( json ) {
@@ -99,13 +104,51 @@ gulp.task('use-in', ( done ) => {
 			return json;
 		} ) )
 		.pipe( gulp.dest( './' ) )
-		.pipe( notify(
-			{
-				title:'The project is switched',
-				message: newProjectPath
-			}
-		) );;
+		.pipe( print( () => {
+			return notice( 'The project is switched: ', newProjectPath );
+		} ) );
 });
+
+/**
+*	Wotch for change files
+**/
+gulp
+	.task(
+		TASK.watch.dev,
+		watcher.bind(
+			null,
+			{
+				file: merge( [ SRC_PATH.js.input, SRC_PATH.scss.input, SRC_PATH.scss.inputThemeScss, ] ),
+				task: merge( [ TASK.compile, TASK.compress.js, ] )
+			}
+		)
+	)
+	.task(
+		TASK.watch.maker,
+		watcher.bind(
+			null,
+			{
+				file: [ SRC_PATH.js.inputThemeJs, SRC_PATH.scss.inputThemeScss, ],
+				task: [ TASK.compile.themeScss, TASK.compress.themeJs, ]
+			}
+		)
+	);
+
+function watcher( data ) {
+	return gulp
+		.watch(
+			data.file,
+			data.task
+		)
+		/*.on( 'change', function( event ) {
+			console.log( 'Event type: ' + event.type );
+			console.log( 'Event path: ' + event.path );
+		} )
+		.on( 'error', function( event ) {
+			console.log( 'Event type: ' + event.type );
+			console.log( 'Event path: ' + event.path );
+		} )*/;
+}
 
 /**
 *	Compress task
@@ -114,29 +157,23 @@ gulp.task( TASK.compress.img, ( done ) => {
 	return gulp
 		.src( SRC_PATH.img )
 		.pipe( imagemin() )
-		.pipe( gulp.dest( '.' ) )
-		.pipe( notify(
-			{
-				title:'Compress images',
-				message:'File: <%= file.relative %>'
-			}
-		) );
+		.pipe( gulp.dest( projectPath + '/' ) )
+		.pipe( print( ( path ) => {
+			return notice( 'Compress image file: ', path );
+		} ) );
 });
 
 gulp.task( TASK.compress.js, ( done ) => {
 	return gulp
-		.src( SRC_PATH.file )
+		.src( SRC_PATH.js.input )
 		.pipe( uglify() )
 		.pipe( rename( function( filePath ){
 			renameFile( filePath, SRC_PATH.js.output.path, SRC_PATH.js.output.sufix )
 		} ) )
-		.pipe( gulp.dest( './' ) )
-		.pipe( notify(
-			{
-				title:'Compress JS.',
-				message:'File: <%= file.relative %>'
-			}
-		) );
+		.pipe( gulp.dest( projectPath + '/' ) )
+		.pipe( print( ( path ) => {
+			return notice( 'Compress JS file: ', path );
+		} ) );
 });
 
 gulp.task( TASK.compress.css, ( done ) => {
@@ -146,19 +183,95 @@ gulp.task( TASK.compress.css, ( done ) => {
 		.pipe( rename( function( filePath ){
 			renameFile( filePath, SRC_PATH.css.output.path, SRC_PATH.css.output.sufix )
 		} ) )
-		.pipe( gulp.dest( './' ) )
-		.pipe( notify(
-			{
-				title:'Compress CSS.',
-				message:'File: <%= file.relative %>'
-			}
-		) );
+		.pipe( gulp.dest( projectPath + '/' ) )
+		.pipe( print( ( path ) => {
+			return notice( 'Compress CSS file: ', path );
+		} ) );
 });
+
+/**
+*	Compail task
+**/
+gulp.task(
+		TASK.compile.scss,
+		compileScss.bind(
+			null,
+			{
+				file: SRC_PATH.scss.input,
+				outputFile: projectPath + '/',
+				rename:true
+			}
+		)
+	)
+	.task(
+		TASK.compile.themeScss,
+		compileScss.bind(
+			null,
+			{
+				file: SRC_PATH.scss.inputThemeScss,
+				outputFile: projectPath + '/',
+				rename:false
+			}
+		)
+	);
+
+function compileScss( data ){
+	return gulp
+			.src( data.file )
+			.pipe( autoprefixer() )
+			.pipe(
+				gulpSass( { outputStyle: 'compressed' } )
+					.on( 'error', gulpSass.logError )
+			)
+			.pipe( rename( function( filePath ){
+				if( data.rename ){
+					renameFile( filePath, SRC_PATH.scss.output.path, SRC_PATH.scss.output.sufix )
+				}
+			} ) )
+			.pipe( gulp.dest( data.outputFile ) )
+			.pipe( print( ( path ) => {
+				return notice( 'Compile SASS file: ', path );
+			} ) );
+};
 
 /**
 * Other function
 **/
+function notice( message, path ){
+	var regexp = /(\w[^\/|//]{1,})/ig ,
+		path = ( path ) ? fileNameColor( path ) : '',
+		message = message ? messageColor( message ) : '' ;
+
+	return  message + path;
+}
+
 function renameFile( path, subDir, sufix) {
 	path.dirname += subDir;
 	path.basename += sufix;
+};
+
+function merge( object ) {
+	var item,
+		deepItem,
+		pushItem,
+		ignor = [ 'all', 'themeJs', ],
+		outputArray = new Array();
+
+	for ( item in object ) {
+
+		if( 'object' === typeof( object[ item ] ) || 'array' === typeof( object[ item ] )){
+			for ( deepItem in object[ item ] ) {
+				if ( -1 === ignor.indexOf( deepItem ) ) {
+					outputArray.push( object[ item ][ deepItem ] );
+				}
+			}
+
+		} else {
+			if ( -1 === ignor.indexOf( deepItem ) ) {
+				outputArray.push( object[ item ] );
+			}
+		}
+	}
+
+	return outputArray;
 };
